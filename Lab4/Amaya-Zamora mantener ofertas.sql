@@ -5,7 +5,7 @@ CREATE TABLE Ofertas (
     descripcion VARCHAR(500)NOT NULL ,
     direccion VARCHAR(50) NOT NULL,
     tipoVivienda CHAR NOT NULL,
-    tamaño NUMBER(3) NOT NULL,
+    tamaï¿½o NUMBER(3) NOT NULL,
     habitada CHAR NOT NULL, 
     costo NUMBER(9) NOT NULL,
     proyectoVivienda CHAR NOT NULL,
@@ -26,7 +26,7 @@ CREATE TABLE FotografiasOfertas(
 CREATE TABLE OPcionesCredito(
     ofertas_numero NUMBER(9) NOT NULL,
     plazo NUMBER NOT NULL,
-    valorMesnsual NUMBER(9) NOT NULL);
+    valorMensual NUMBER(9) NOT NULL);
     
 CREATE TABLE Usuarios (
     id VARCHAR(5)NOT NULL,
@@ -378,6 +378,7 @@ INSERT INTO OrigenFondos VALUES(3,89000000,'T','T','BancoDeBogota');
 
 /*CONSTRUCCION: CONSULTANDO*/
 
+/*Mantener Oferta*/
 /*Usuarios con mas ofertas*/
 SELECT id, COUNT(usuarios_id)
 FROM usuarios JOIN ofertas ON (id=usuarios_id)
@@ -472,3 +473,166 @@ IF OpcionesCredito.valorMensual * OpcionesCredito.plazo >= Ofertas.costo THEN
 UPDATE OpcionesCredito set plazo = newValue;
 END IF; 
 END TR_UPDATE_COND_BF;
+/
+/*Mantener Demanda*/
+
+/*Triggers*/
+
+/*AD*/
+/*El numero se genra automaticamente*/
+CREATE TRIGGER TR_DEMANDAS_NUMERO_BI
+BEFORE INSERT ON demandas
+FOR EACH ROW
+DECLARE
+numer NUMBER; 
+BEGIN
+SELECT COUNT(*)+1 INTO numer FROM Demandas ;
+:new.numero := numer;
+END TR_DEMANDAS_BI;
+/
+
+/*La fecha se asigna Automaticamente*/
+CREATE TRIGGER TR_DEMANDAS_FECHA_BI
+BEFORE INSERT ON Demandas
+FOR EACH ROW
+DECLARE
+fechaHora DATE := CURRENT_DATE;
+BEGIN
+    :new.fecha := fechaHora;
+END TR_OFERTAS_FECHA_BI;
+/
+/*El metodo de pago por defecto es efectivo*/
+CREATE TRIGGER TR_ORIGENFONDOS_PAGO_BI
+BEFORE INSERT ON Demandas
+FOR EACH ROW
+DECLARE
+pago CHAR := "F"
+BEGIN
+    :new.credito := pago;
+END TR_ORIGENFONDOS_PAGO_BI;
+/
+/*Si el pago es en efectivo estaAprovado y entidadBancaria es null*/
+CREATE TRIGGER TR_ORIGENFONDOS_PAGO_BI
+BEFORE INSERT ON OrigenFondos
+FOR EACH ROW
+BEGIN
+IF new.credito = 'F' THEN
+    new.entidadBancaria := null;
+    new.estaAprobado := null;
+END IF
+END TR_ORIGENFONDOS_PAGO_BI;
+/
+/*Por defecto el interes en una ubicacion es de nivel 1*/
+CREATE TRIGGER TR_INTERESEN_NIVEL_BI
+BEFORE INSERT ON InteresEn
+FOR EACH ROW
+BEGIN
+new.nivel := 1;
+END TR_INTERESEN_NIVEL_BI;
+/
+/*MO*/
+/*Solo se actualiza el tipoVivienda y el maxCompra*/
+CREATE TRIGGER TR_DEMANDAS_DU
+BEFORE UPDATE ON Demandas
+FOR EACH ROW
+BEGIN
+old.tipoVivienda = new.tipoVivienda;
+old.maxCompra = new.maxCompra;
+END TR_DEMANDAS_DU;
+/
+/*Solo se actualiza estaAprobada y entidadBancaria si la opcion de fondo es a credito*/
+CREATE TRIGGER TR_ORIGENFONDOS_BU
+BEFORE UPDATE ON OrigenFondos
+FOR EACH ROW
+BEGIN
+IF new.credito = "T" THEN
+    old.credito := new.credito;
+    old.estaAprobado := new.estaAprobado;
+    old.entidadBancaria := new.entidadBancaria;
+END IF
+END TR_ORIGENFONDOS_BU;
+/
+/*No se puede modificar una ubicacion de interes*/
+CREATE TRIGGER TR_INTERESEN_BU
+BEFORE UPDATE ON InteresEn
+FOR EACH ROW
+BEGIN
+IF new.ubicaciones_codigo = (SELECT ubicaciones_codigo FROM InteresEn) THEN
+    raise_application_error(-20001,'No se puede modificar este campo');
+END IF
+END TR_INTERESEN_BU;
+/
+/*El*/
+/*No se puede eliminar una demanda*/
+CREATE TRIGGER TR_DEMANDAS_BD
+BEFORE DELETE ON Demandas
+FOR EACH ROW
+BEGIN
+IF new.numero = (SELECT numero FROM numero) THEN
+    raise_application_error(-20001,'No se puede eliminar este campo');
+END IF
+END TR_INTERESEN_BU;
+/
+/*No se puede eliminar una ubicacion de interes*/
+CREATE TRIGGER TR_INTERESEN_BU
+BEFORE DELETE ON InteresEn
+FOR EACH ROW
+BEGIN
+IF new.ubicaciones_codigo = (SELECT ubicaciones_codigo FROM InteresEn) THEN
+    raise_application_error(-20001,'No se puede eliminar este campo');
+END IF
+END TR_INTERESEN_BU;
+/
+/*DisparadoresOK*/
+/*El numero se genra automaticamente*/
+INSERT INTO Demandas VALUES(76,'1-ene-2022','A',59000800,'U-1');
+INSERT INTO Demandas VALUES(9,'1-ene-2022','C',19000050,'U-12');
+INSERT INTO Demandas VALUES(4,'1-ene-2022','C',89000040,'U-13');
+
+/*La fecha se asigna Automaticamente*/
+INSERT INTO Demandas VALUES(76,'1-ene-2022','A',59000800,'U-1');
+INSERT INTO Demandas VALUES(9,'1-ene-2022','C',19000050,'U-12');
+INSERT INTO Demandas VALUES(4,'1-ene-2022','C',89000040,'U-13');
+
+/*El metodo de pago por defecto es efectivo*/
+INSERT INTO OrigenFondos VALUES(4,59000000,'F','T','Davivienda');
+INSERT INTO OrigenFondos VALUES(5,19000000,'F','T','Bancolombia');
+INSERT INTO OrigenFondos VALUES(6,89000000,'F','T','BancoDeBogota');
+
+/*Si el pago es en efectivo estaAprovado y entidadBancaria es null*/
+INSERT INTO OrigenFondos VALUES(7,59000000,'F','T','Davivienda');
+INSERT INTO OrigenFondos VALUES(8,19000000,'F','T','Bancolombia');
+INSERT INTO OrigenFondos VALUES(9,89000000,'F','T','BancoDeBogota');
+
+/*Por defecto el interes en una ubicacion es de nivel 1*/
+INSERT INTO InteresEn VALUES('U-1',10,3);
+INSERT INTO InteresEn VALUES('U-2',11,2);
+INSERT INTO InteresEn VALUES('U-6',12,3);
+INSERT INTO InteresEn VALUES('U-18',13,4);
+
+/*MO*/
+/*Solo se actualiza el tipoVivienda y el maxCompra*/
+UPDATE Demandas SET(10,'20-oct-2022','A',79000800,'U-1');
+UPDATE Demandas SET(11,'20-oct-2022','C',69000050,'U-12');
+UPDATE Demandas SET(12,'20-oct-2022','C',9000040,'U-13');
+
+/*Solo se actualiza estaAprobada y entidadBancaria si la opcion de fondo es a credito*/
+INSERT OrigenFondos SET(1,59000000,'F','T','Davivienda');
+INSERT OrigenFondos SET(2,19000000,'T','F','BancoDeLaMujer');
+INSERT OrigenFondos SET(3,89000000,'F','T','BancoDeBogota');
+
+/*No se puede modificar una ubicacion de interes*/
+INSERT InteresEn SET('U-1',10,3);
+INSERT InteresEn SET('U-2',11,2);
+
+/*El*/
+/*No se puede eliminar una demanda*/
+DELETE  FROM Demandas WHERE numero = 10;
+DELETE  FROM Demandas WHERE numero = 11;
+
+/*No se puede eliminar una ubicacion de interes*/
+DELETE  FROM InteresEn WHERE Demandas_numero = 10;
+DELETE  FROM InteresEn WHERE Demandas_numero = 10;
+
+/*TuplasNoOK*/
+
