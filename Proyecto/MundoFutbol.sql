@@ -4,63 +4,61 @@ CREATE TABLE Usuarios(
     correo VARCHAR(100));
 CREATE TABLE PersonasNaturales(
     Usuarios_id NUMBER(5),
-    tipoDocumento VARCHAR(3),
+    tipoDocumento VARCHAR(2),
     NumeroDocumento NUMBER(10),
     Nombre VARCHAR(100));
 CREATE TABLE Empresas(
     Usuarios_id NUMBER(5),
-    Nit VARCHAR(9) NOT NULL,
+    Nit VARCHAR(10) NOT NULL,
     Nombre VARCHAR(100));
 CREATE TABLE Torneos(
-    Nombre VARCHAR(100),
+    Nombre VARCHAR(50),
     FechaInicio DATE,
     FechaFin DATE,
     Seleccion CHAR);
 CREATE TABLE Ligas(
     Torneos_nombre VARCHAR(100),
-    NumParticipantes NUMBER(5),
-    tablaPosiciones VARCHAR(100)
+    NumParticipantes NUMBER(5)
 );
 CREATE TABLE Grupos(
     Torneos_Nombre VARCHAR(100),
-    NumParticipantes NUMBER(5),
-    tablaPosiciones VARCHAR(100)
+    NumGrupos NUMBER(5)
 );
 CREATE TABLE Confederaciones(
-    Siglas VARCHAR(5),
-    Nombre VARCHAR(100)
+    Siglas VARCHAR(8),
+    Nombre VARCHAR(50)
 );
 CREATE TABLE Jugadores(
     id_ NUMBER(5),
-    NombreCompleto VARCHAR(100),
+    NombreCompleto VARCHAR(50),
     fechaNacimiento DATE,
     Selecciones_Nombre VARCHAR(100),
     Clubes_Nombre VARCHAR(100)
 );
 CREATE TABLE Selecciones(
-    Nombre VARCHAR(100),
-    DirTecnico VARCHAR(100),
-    Confederaciones_Siglas VARCHAR(5),
-    Estadio_Nombre VARCHAR(100)
+    Nombre VARCHAR(50),
+    DirTecnico VARCHAR(50),
+    Confederaciones_Siglas VARCHAR(8),
+    Estadios_Nombre VARCHAR(100)
 );
 CREATE TABLE Clubes(
     Nombre VARCHAR(100),
     pais VARCHAR(100),
     DirTecnico VARCHAR(100),
-    Estadio_Nombre VARCHAR(100)
+    Estadios_Nombre VARCHAR(100)
 );
 CREATE TABLE Titulos(
     Id_ NUMBER(5),
     Nombre VARCHAR(100),
     Selecciones_Nombre VARCHAR(100),
     Clubes_Nombre VARCHAR(100),
-    Jugadores_Nombre VARCHAR(100),
-    vecesGanado NUMBER(5)
+    Jugadores_id NUMBER(5),
+    vecesGanado NUMBER(2)
 );
 CREATE TABLE Partidos(
     Id_ NUMBER(5),
-    EquipoLocal VARCHAR(100),
-    EquipoVisitante VARCHAR(100),
+    EquipoLocal VARCHAR(50),
+    EquipoVisitante VARCHAR(50),
     FechaDeJuego DATE,
     Resultado VARCHAR(5),
     Estadios_Nombre VARCHAR(100)
@@ -73,42 +71,44 @@ CREATE TABLE Estadios(
 );
 CREATE TABLE Sugerencias(
     Partidos_id NUMBER(5),
-    Descripcion VARCHAR(5)
+    Descripcion VARCHAR(500)
 );
 
 CREATE TABLE PartidosConsultados(
     Usuario_id NUMBER(5),
     Partidos_id NUMBER(5)
 );
+
 CREATE TABLE Periodistas(
     Usuario_id NUMBER(5),
-    Empresas_Usuarios_id NUMBER(5)
+    Empresas_Usuarios_id NUMBER(10)
 );
+
 CREATE TABLE EstadisticasExtra(
     Torneos_nombre VARCHAR(100),
     TablaGoleadores VARCHAR(100),
     TablaAsistidores VARCHAR(100),
     TablaPorteriasACero VARCHAR(100)
 );
-CREATE TABLE Integrantes(
+
+CREATE TABLE EquiposTorneo(
     Id_ NUMBER(5),
-    Torneos_nombre VARCHAR(100),
+    Grupos_Torneos_nombre VARCHAR(100),
+    Ligas_Torneos_nombre VARCHAR(100),
     Selecciones_Nombre VARCHAR(100),
-    Clubes_Nombre VARCHAR(100)
+    Clubes_Nombre VARCHAR(100),
+    posicion NUMBER(2)
 );
-CREATE TABLE TorneosConfederacion(
-    Torneos_nombre VARCHAR(100),
-    Confederaciones_Siglas VARCHAR(5)
-);
+
 CREATE TABLE EstadisticasJugadores(
     Jugadores_id NUMBER(5),
     Goles NUMBER(5),
     Asistencias NUMBER(5),
-    PorteriasACero NUMBER(5),
-    PenaltisParados NUMBER(5)
+    PorteriasInvictas NUMBER(5),
+    PenaltisAtajados NUMBER(5)
 );
 CREATE TABLE EstadisticasClubes(
-    Clubes_nombre VARCHAR(5),
+    Clubes_nombre VARCHAR(50),
     PartidosGanados NUMBER(5),
     PartidosEmpatados NUMBER(5),
     PartidosPerdidos NUMBER(5),
@@ -116,28 +116,60 @@ CREATE TABLE EstadisticasClubes(
     GolesEnContra NUMBER(5)
 );
 CREATE TABLE EstadisticasSelecciones(
-    Selecciones_nombre VARCHAR(5),
+    Selecciones_nombre VARCHAR(50),
     PartidosGanados NUMBER(5),
     PartidosEmpatados NUMBER(5),
     PartidosPerdidos NUMBER(5),
     GolesAnotados NUMBER(5),
     GolesEnContra NUMBER(5)
 );
+CREATE TABLE FasesFinales(
+    id_ NUMBER(5),
+    Grupos_Torneos_nombre VARCHAR(100),
+    fase VARCHAR(100),
+    Cruce VARCHAR(100)
+);
+
 
 /*Ttipos*/
 
 ALTER TABLE Usuarios ADD CONSTRAINT Tcorreo CHECK(REGEXP_LIKE(correo,'\S+@\S+\.\S+'));
 ALTER TABLE Partidos ADD CONSTRAINT Tresultado CHECK(REGEXP_LIKE(Resultado,'[0-9]{1,2}\:[0-9]{1,2}'));
-ALTER TABLE PersonasNaturales ADD CONSTRAINT Ttipo CHECK(tipoDocumento LIKE 'CC' OR tipoDocumento LIKE 'TI');
+ALTER TABLE FasesFinales ADD CONSTRAINT Tcruce CHECK(REGEXP_LIKE(Cruce,'(\w?\W?\w)'));
+ALTER TABLE PersonasNaturales ADD CONSTRAINT Ttipo CHECK(tipoDocumento LIKE 'CC' OR tipoDocumento LIKE 'TI' OR tipoDocumento LIKE 'RS' OR tipoDocumento LIKE 'PA');
 ALTER TABLE Torneos ADD CONSTRAINT booleanos CHECK(Seleccion LIKE 'F' OR Seleccion LIKE 'T');
-ALTER TABLE Ligas ADD CONSTRAINT TlinkPosicionesI CHECK(tablaPosiciones LIKE ('https://:') AND REGEXP_LIKE(tablaPosiciones,'\S+'));
-ALTER TABLE Grupos ADD CONSTRAINT TlinkPosicionesG CHECK(tablaPosiciones LIKE ('https://:') AND REGEXP_LIKE(tablaPosiciones,'\S+'));
-ALTER TABLE EstadisticasExtra ADD CONSTRAINT TlinkGoleador (CHECK(tablaGoleadores LIKE ('https://:') AND REGEXP_LIKE(tablaGloleadores,'\S+'));
-ALTER TABLE EstadisticasExtra ADD CONSTRAINT TlinkAsistente (CHECK(TablaAsistidores LIKE ('https://:') AND REGEXP_LIKE(TablaAsistidores,'\S+'));
-ALTER TABLE EstadisticasExtra ADD CONSTRAINT TlinkPortero (CHECK(TablaPorteriasACero LIKE ('https://:') AND REGEXP_LIKE(TablaPorteriasACero,'\S+'));
+ALTER TABLE EstadisticasExtra ADD CONSTRAINT TlinkGoleador CHECK(TablaGoleadores LIKE ('https://') AND REGEXP_LIKE(TablaGoleadores,'\S+'));
+ALTER TABLE EstadisticasExtra ADD CONSTRAINT TlinkAsistente CHECK(TablaAsistidores LIKE ('https://') AND REGEXP_LIKE(TablaAsistidores,'\S+'));
+ALTER TABLE EstadisticasExtra ADD CONSTRAINT TlinkPortero CHECK(TablaPorteriasACero LIKE ('https://') AND REGEXP_LIKE(TablaPorteriasACero,'\S+'));
+ALTER TABLE Usuarios ADD CONSTRAINT TidUsuario CHECK(Id_ >= 0);
+ALTER TABLE Ligas ADD CONSTRAINT LigaNumero CHECK(numParticipantes >= 0);
+ALTER TABLE Grupos ADD CONSTRAINT GrupoNumero CHECK(numGrupos >= 0);
+ALTER TABLE EquiposTorneo ADD CONSTRAINT EquiposTorneoId CHECK(Id_ >= 0);
+ALTER TABLE EquiposTorneo ADD CONSTRAINT TorneoPosiciones CHECK(posicion >= 0);
+ALTER TABLE FasesFinales ADD CONSTRAINT FaseFinalId CHECK(Id_ >= 0);
+ALTER TABLE EstadisticasSelecciones ADD CONSTRAINT SeleccionesGanados CHECK(PartidosGanados >= 0);
+ALTER TABLE EstadisticasSelecciones ADD CONSTRAINT SeleccionesPerdidos CHECK(PartidosPerdidos >= 0);
+ALTER TABLE EstadisticasSelecciones ADD CONSTRAINT SeleccionesEmpatados CHECK(PartidosEmpatados >= 0);
+ALTER TABLE EstadisticasSelecciones ADD CONSTRAINT SeleccionesAnotados CHECK(GolesAnotados >= 0);
+ALTER TABLE EstadisticasSelecciones ADD CONSTRAINT SeleccionesEnContra CHECK(GolesEnContra >= 0);
+ALTER TABLE EstadisticasClubes ADD CONSTRAINT ClubesGanados CHECK(PartidosGanados >= 0);
+ALTER TABLE EstadisticasClubes ADD CONSTRAINT ClubesPerdidos CHECK(PartidosPerdidos >= 0);
+ALTER TABLE EstadisticasClubes ADD CONSTRAINT ClubesEmpatados CHECK(PartidosEmpatados >= 0);
+ALTER TABLE EstadisticasClubes ADD CONSTRAINT ClubesAnotados CHECK(GolesAnotados >= 0);
+ALTER TABLE EstadisticasClubes ADD CONSTRAINT ClubesEnContra CHECK(GolesEnContra >= 0);
+ALTER TABLE EstadisticasJugadores ADD CONSTRAINT JugadoreGol CHECK(Goles >= 0);
+ALTER TABLE EstadisticasJugadores ADD CONSTRAINT JugadorAsistencias CHECK(Asistencias >= 0);
+ALTER TABLE EstadisticasJugadores ADD CONSTRAINT JugadorInvicta CHECK(PorteriasInvictas >= 0);
+ALTER TABLE EstadisticasJugadores ADD CONSTRAINT JugadorAtajados CHECK(PenaltisAtajados >= 0);
+ALTER TABLE Jugadores ADD CONSTRAINT JugadorId CHECK(Id_ >= 0);
+ALTER TABLE Partidos ADD CONSTRAINT PartidosId CHECK(Id_ >= 0);
+ALTER TABLE Titulos ADD CONSTRAINT TitulosId CHECK(Id_ >= 0);
+ALTER TABLE Titulos ADD CONSTRAINT TitulosVeces CHECK(vecesGanado >= 0);
+ALTER TABLE Estadios ADD CONSTRAINT EstadioCapasidad CHECK(Capasidad >= 0);
+
 
 /*Primary Keys*/
-ALTER TABLE Usuarios ADD CONSTRAINT PK_USUARIOS PRIMARY KEY (Id_);
+ALTER TABLE Usuarios ADD CONSTRAINT PK_USUARIOS PRIMARY KEY (id_);
 ALTER TABLE PersonasNaturales ADD CONSTRAINT PK_PERSONASN PRIMARY KEY (Usuarios_id);
 ALTER TABLE Empresas ADD CONSTRAINT PK_EMPRESAS PRIMARY KEY (Usuarios_id);
 ALTER TABLE Clubes ADD CONSTRAINT PK_CLUB PRIMARY KEY (Nombre);
@@ -147,18 +179,18 @@ ALTER TABLE EstadisticasClubes ADD CONSTRAINT PK_ESTADISTICACLUB PRIMARY KEY (Cl
 ALTER TABLE EstadisticasExtra ADD CONSTRAINT PK_ESTADISTICAEXTRA PRIMARY KEY (Torneos_nombre);
 ALTER TABLE EstadisticasJugadores ADD CONSTRAINT PK_ESTADISTICAJUGADOR PRIMARY KEY (Jugadores_id);
 ALTER TABLE EstadisticasSelecciones ADD CONSTRAINT PK_ESTADISTICASELECCION PRIMARY KEY (Selecciones_Nombre);
+ALTER TABLE FasesFinales ADD CONSTRAINT PK_FASEFINAL PRIMARY KEY (id_);
 ALTER TABLE Grupos ADD CONSTRAINT PK_GRUPO PRIMARY KEY (Torneos_nombre);
-ALTER TABLE Integrantes ADD CONSTRAINT PK_INTEGRANTES PRIMARY KEY (Id_);
+ALTER TABLE EquiposTorneo ADD CONSTRAINT PK_EquiposTorneos PRIMARY KEY (Id_);
 ALTER TABLE Jugadores ADD CONSTRAINT PK_JUGADORES PRIMARY KEY (Id_);
 ALTER TABLE Ligas ADD CONSTRAINT PK_LIGA PRIMARY KEY (Torneos_nombre);
 ALTER TABLE Partidos ADD CONSTRAINT PK_PARTIDO PRIMARY KEY (Id_);
 ALTER TABLE PartidosConsultados ADD CONSTRAINT PK_PARTIDOSCONSULTA PRIMARY KEY (Partidos_id,Usuario_id);
-ALTER TABLE Periodistas ADD CONSTRAINT PK_PERIODISTA PRIMARY KEY (Usuarios_id);
+ALTER TABLE Periodistas ADD CONSTRAINT PK_PERIODISTA PRIMARY KEY (Usuario_id);
 ALTER TABLE Selecciones ADD CONSTRAINT PK_SELECCION PRIMARY KEY (Nombre);
 ALTER TABLE Sugerencias ADD CONSTRAINT PK_SUGERENCIAS PRIMARY KEY (Partidos_id);
 ALTER TABLE Titulos ADD CONSTRAINT PK_TITULOS PRIMARY KEY (Id_);
 ALTER TABLE Torneos ADD CONSTRAINT PK_TORNEOS PRIMARY KEY (Nombre);
-ALTER TABLE TorneosConfederacion ADD CONSTRAINT PK_TORNEOSCONFEDERACION PRIMARY KEY (Torneos_nombre,Confederaciones_Siglas);
 
 /*Unique Keys*/
 ALTER TABLE Usuarios ADD CONSTRAINT UK_USUARIOS UNIQUE (Correo);
@@ -168,21 +200,20 @@ ALTER TABLE PersonasNaturales ADD CONSTRAINT UK_PERSONASN UNIQUE (TipoDocumento,
 
 /*FOREIGN Key*/
 
-ALTER TABLE Integrantes ADD CONSTRAINT FK_INTEGRANTES FOREIGN KEY (Torneos_id) REFERENCES Torneos(Id_);
-ALTER TABLE Integrantes ADD CONSTRAINT FK_INTEGRANTECLUB FOREIGN KEY (Clubes_Nombre) REFERENCES Clubes(Nombre);
-ALTER TABLE Integrantes ADD CONSTRAINT FK_INTEGRANTESELECCION FOREIGN KEY (Selecciones_Nombre) REFERENCES Selecciones(Nombre);
-ALTER TABLE Grupos ADD CONSTRAINT FK_GRUPOS FOREIGN KEY (Torneos_id) REFERENCES Torneos(Id_);
-ALTER TABLE Ligas ADD CONSTRAINT FK_LIGAS FOREIGN KEY (Torneos_id) REFERENCES Torneos(Id_);
-ALTER TABLE EstadisticasExtra ADD CONSTRAINT FK_ESTADISTICASEXTRA FOREIGN KEY (Torneos_id) REFERENCES Torneos(Id_);
-ALTER TABLE TorneosConfederacion ADD CONSTRAINT FK_TORNEOCONFEDERACION FOREIGN KEY (Torneos_id) REFERENCES Torneos(Id_);
-ALTER TABLE TorneosConfederacion ADD CONSTRAINT FK_TORNEOCONFEDERACION2 FOREIGN KEY (Confederaciones_Siglas) REFERENCES Confederaciones(Siglas);
+ALTER TABLE EquiposTorneo ADD CONSTRAINT FK_EquiposTorneosGRUPO FOREIGN KEY (Grupos_Torneos_nombre) REFERENCES Grupos(Torneos_nombre);
+ALTER TABLE EquiposTorneo ADD CONSTRAINT FK_EquiposTorneosLIGA FOREIGN KEY (Ligas_Torneos_nombre) REFERENCES Ligas(Torneos_nombre);
+ALTER TABLE EquiposTorneo ADD CONSTRAINT FK_INTEGRANTECLUB FOREIGN KEY (Clubes_Nombre) REFERENCES Clubes(Nombre);
+ALTER TABLE EquiposTorneo ADD CONSTRAINT FK_EquiposTorneosELECCION FOREIGN KEY (Selecciones_Nombre) REFERENCES Selecciones(Nombre);
+ALTER TABLE Grupos ADD CONSTRAINT FK_GRUPOS FOREIGN KEY (Torneos_nombre) REFERENCES Torneos(Nombre);
+ALTER TABLE FasesFinales ADD CONSTRAINT FK_FASEFINAL FOREIGN KEY (Grupos_Torneos_nombre) REFERENCES Grupos(Torneos_nombre);
+ALTER TABLE Ligas ADD CONSTRAINT FK_LIGAS FOREIGN KEY (Torneos_nombre) REFERENCES Torneos(Nombre);
+ALTER TABLE EstadisticasExtra ADD CONSTRAINT FK_ESTADISTICASEXTRA FOREIGN KEY (Torneos_nombre) REFERENCES Torneos(Nombre);
 ALTER TABLE PartidosConsultados ADD CONSTRAINT FK_PARTIDOSCONSULTADO FOREIGN KEY (Partidos_id) REFERENCES Partidos(Id_);
-ALTER TABLE PartidosConsultados ADD CONSTRAINT FK_USUARIOSCONSULTA FOREIGN KEY (Usuarios_id) REFERENCES Usuarios(Id_);
-ALTER TABLE Clubes ADD CONSTRAINT FK_CLUBESTADISTICA FOREIGN KEY (Clubes_Nombre) REFERENCES Clubes(Nombre);
+ALTER TABLE PartidosConsultados ADD CONSTRAINT FK_USUARIOSCONSULTA FOREIGN KEY (Usuario_id) REFERENCES Usuarios(Id_);
 ALTER TABLE Selecciones ADD CONSTRAINT FK_SELECCIONESCONFEDERACION FOREIGN KEY (Confederaciones_Siglas) REFERENCES Confederaciones(Siglas);
 ALTER TABLE Selecciones ADD CONSTRAINT FK_SELECCIONESESTADIO FOREIGN KEY (Estadios_Nombre) REFERENCES Estadios(Nombre);
-ALTER TABLE Clubes ADD CONSTRAINT FK_CLUBESESTADIO FOREIGN KEY (Estadio_Nombre) REFERENCES Estadio(Nombre);
-ALTER TABLE Partidos ADD CONSTRAINT FK_PARTIDOSESTADIO FOREIGN KEY (Estadio_Nombre) REFERENCES Estadio(Nombre);
+ALTER TABLE Clubes ADD CONSTRAINT FK_CLUBESESTADIO FOREIGN KEY (Estadios_Nombre) REFERENCES Estadios(Nombre);
+ALTER TABLE Partidos ADD CONSTRAINT FK_PARTIDOSESTADIO FOREIGN KEY (Estadios_Nombre) REFERENCES Estadios(Nombre);
 ALTER TABLE Sugerencias ADD CONSTRAINT FK_SUGERECIAPARTIDO FOREIGN KEY (Partidos_id) REFERENCES Partidos(Id_);
 ALTER TABLE EstadisticasJugadores ADD CONSTRAINT FK_ESTADISTICASJUGADOR FOREIGN KEY (Jugadores_id) REFERENCES Jugadores(Id_);
 ALTER TABLE EstadisticasClubes ADD CONSTRAINT FK_ESTADISTICACLUB FOREIGN KEY (Clubes_Nombre) REFERENCES Clubes(Nombre);
@@ -193,7 +224,7 @@ ALTER TABLE Titulos ADD CONSTRAINT FK_TITULOSJUGADOR FOREIGN KEY (Jugadores_id) 
 ALTER TABLE Titulos ADD CONSTRAINT FK_TITULOSCLUB FOREIGN KEY (Clubes_Nombre) REFERENCES Clubes(Nombre);
 ALTER TABLE Titulos ADD CONSTRAINT FK_TITULOSSELECCION FOREIGN KEY (Selecciones_Nombre) REFERENCES Selecciones(Nombre);
 ALTER TABLE Empresas ADD CONSTRAINT FK_EMPRESASUSUARIO FOREIGN KEY (Usuarios_id) REFERENCES Usuarios(Id_);
-ALTER TABLE Periodistas ADD CONSTRAINT FK_PERIODISRAEMPRESAS FOREIGN KEY (Periodistas_Usuarios_id) REFERENCES Periodistas(Usuarios_id_);
+ALTER TABLE Periodistas ADD CONSTRAINT FK_PERIODISRAEMPRESAS FOREIGN KEY (Empresas_Usuarios_id) REFERENCES Empresas(Usuarios_id);
 ALTER TABLE PersonasNaturales ADD CONSTRAINT FK_PERSONAUSUARIO FOREIGN KEY (Usuarios_id) REFERENCES Usuarios(Id_);
 
 /*PoblarOk*/
@@ -208,60 +239,76 @@ INSERT INTO Usuarios VALUES(6,3119327484,'correo6@escuela.com');
 INSERT INTO Usuarios VALUES(7,3119327482,'correo7@escuela.com');
 INSERT INTO personasnaturales VALUES(5,'CC','100138273','Sebastian Zamora Urrego');
 INSERT INTO personasnaturales VALUES(7,'CC','100138223','Jessica Urrego Barrera');
-INSERT INTO personasnaturales VALUES(2,'CC','100138273','Santiago Silva Gomez');
+INSERT INTO personasnaturales VALUES(2,'CC','100138973','Santiago Silva Gomez');
 INSERT INTO Empresas VALUES(1,'100138273','AppelMusic');
 INSERT INTO Empresas VALUES(4,'100348273','Amazon');
 INSERT INTO Empresas VALUES(3,'100638273','ESPN');
-INSERT INTO Periodistas VALUES(2,'100638273','Santiago Silva Gomez');
+INSERT INTO Periodistas VALUES(2,3);
 
 /*Insert CRUD JUGADORES*/
-INSERT INTO Selecciones VALUES('Francia','Didier DeChams','Stade De France');
-INSERT INTO Selecciones VALUES('Alemania','Hanzi Flick','Olimpico De Berlin');
-INSERT INTO Selecciones VALUES('Belgica','Roberto Martines','Olimpico De Bruselas');
-INSERT INTO Selecciones VALUES('Inglaterra','Gary Soulgate','Wembley');
-INSERT INTO Selecciones VALUES('Portugal','Fernando Santos','Estadio Da Luz');
-INSERT INTO Selecciones VALUES('Polonia','CzesÅ‚aw Michniewicz','Estadio Nacional De Varsobia');
+INSERT INTO Confederaciones VALUES('UEFA','Union of European Football Associations');
+INSERT INTO Confederaciones VALUES('CONMEBOL','Confederacion Sudamericana de Futbol.');
+INSERT INTO Estadios VALUES('Stade De France', 81338,'Francia','Paris');
+INSERT INTO Estadios VALUES('Etihat Stadium', 55097,'Inglaterra','Manchester');
+INSERT INTO Estadios VALUES('Old Traford', 76962,'Inglaterra','Manchester');
+INSERT INTO Estadios VALUES('Spotify Camp Now', 81338,'España','Barcelona');
+INSERT INTO Estadios VALUES('Olimpico de Berlin', 81338,'Alemania','Berlin');
+INSERT INTO Estadios VALUES('Olimpico de Bruselas', 55097,'Belgica','Bruselas');
+INSERT INTO Estadios VALUES('Wembley', 76962,'Inglaterra','Londres');
+INSERT INTO Estadios VALUES('Estadio Da Luz', 81338,'Portugal','Lisboa');
+INSERT INTO Estadios VALUES('Estadio Nacional De Varsobia', 81338,'Polonia','Varsobia');
+INSERT INTO Estadios VALUES('Parc des Princes', 55097,'Francia','Paris');
+INSERT INTO Estadios VALUES('Olimpico De Roma', 76962,'Italia','Roma');
+INSERT INTO Estadios VALUES('Parc', 81338,'Dinamarca','Cophenage');
+INSERT INTO Estadios VALUES('La romadera', 81338,'España','Zaragoza');
+INSERT INTO Estadios VALUES('Estadio Nacional de Luxemburgo', 55097,'Luxemburgo','Luxemburgo');
+INSERT INTO Estadios VALUES('Estadio Monumental', 55097,'Argentina','Buenos Aires');
+INSERT INTO Selecciones VALUES('España','Luis Enrique','UEFA','Spotify Camp Now');
+INSERT INTO Selecciones VALUES('Argentina','Lionel Scaloni','CONMEBOL','Estadio Monumental');
+INSERT INTO Selecciones VALUES('Francia','Didier DeChams','UEFA','Stade De France');
+INSERT INTO Selecciones VALUES('Alemania','Hanzi Flick','UEFA','Olimpico de Berlin');
+INSERT INTO Selecciones VALUES('Belgica','Roberto Martines','UEFA','Olimpico de Bruselas');
+INSERT INTO Selecciones VALUES('Inglaterra','Gary Soulgate','UEFA','Wembley');
+INSERT INTO Selecciones VALUES('Portugal','Fernando Santos','UEFA','Estadio Da Luz');
+INSERT INTO Selecciones VALUES('Polonia','CzesÅ‚aw Michniewicz','UEFA','Estadio Nacional De Varsobia');
 INSERT INTO Clubes VALUES('Paris Saint German','Francia','Cristoft Galtier','Parc des Princes');
 INSERT INTO Clubes VALUES('Lazio','Italia','Mautizio Allegri','Olimpico De Roma');
 INSERT INTO Clubes VALUES('FC Copenhague','Dinamarca','Jacob Neestrop','Parc');
-INSERT INTO Clubes VALUES('FC Barcelona','EspaÃ±a','Xavi Hernandez','Spotify Camp Now');
-INSERT INTO Clubes VALUES('Real Sociedad','EspaÃ±a','Imanol Alguacil','La romadera');
-INSERT INTO Clubes VALUES('Mancheste United','Inglaterra','Erick Ten Hack','Old Traford');
-INSERT INTO Clubes VALUES('Mancheste City','Inglaterra','Pep Guardiola','Etihat Stadium');
+INSERT INTO Clubes VALUES('FC Barcelona','España','Xavi Hernandez','Spotify Camp Now');
+INSERT INTO Clubes VALUES('Real Sociedad','España','Imanol Alguacil','La romadera');
+INSERT INTO Clubes VALUES('Manchester United','Inglaterra','Erick Ten Hack','Old Traford');
+INSERT INTO Clubes VALUES('Manchester City','Inglaterra','Pep Guardiola','Etihat Stadium');
 INSERT INTO Clubes VALUES('F91 Dudelange','Luxemburgo','Fangeiro','Estadio Nacional de Luxemburgo');
 INSERT INTO Jugadores VALUES(1,'Lionel Andres Messi','24/jun/1987','Argentina','Paris Saint German');
 INSERT INTO Jugadores VALUES(2,'Cristian Ronaldo','5/feb/1985','Portugal','Manchester United');
 INSERT INTO Jugadores VALUES(3,'Robert Lewandowski','21/ago/1988','Polonia','FC Barcelona');
-INSERT INTO Jugadores VALUES(4,'Kevin De Bruyne','28/jun/1991','Belgica','MAnchester City');
-INSERT INTO Jugadores VALUES(5,'David Silva','8/ene/1986','EspaÃ±a','Real Sociedad');
-INSERT INTO Jugadores VALUES(6,'Pedro Gonzalez','25/nov/2002','EspaÃ±a','FC Barcelona');
-INSERT INTO Jugadores VALUES(7,'Pedro Rodriguez','28/jun/1987','EspaÃ±a','Lazio');
+INSERT INTO Jugadores VALUES(4,'Kevin De Bruyne','28/jun/1991','Belgica','Manchester City');
+INSERT INTO Jugadores VALUES(5,'David Silva','8/ene/1986','España','Real Sociedad');
+INSERT INTO Jugadores VALUES(6,'Pedro Gonzalez','25/nov/2002','España','FC Barcelona');
+INSERT INTO Jugadores VALUES(7,'Pedro Rodriguez','28/jun/1987','España','Lazio');
 INSERT INTO EstadisticasJugadores VALUES(7,45,12,0,0);
 INSERT INTO EstadisticasJugadores VALUES(2,845,412,0,0);
 INSERT INTO EstadisticasJugadores VALUES(1,645,612,0,0);
 INSERT INTO EstadisticasJugadores VALUES(4,445,312,0,0);
-INSERT INTO EstadisticasClubes VALUES('Mancheste City',530,262,427,1592,900);
-INSERT INTO EstadisticasClubes VALUES('Mancheste United',630,222,227,3592,1200);
+INSERT INTO EstadisticasClubes VALUES('Manchester City',530,262,427,1592,900);
+INSERT INTO EstadisticasClubes VALUES('Manchester United',630,222,227,3592,1200);
 INSERT INTO EstadisticasClubes VALUES('FC Barcelona',830,562,127,3592,1200);
 INSERT INTO EstadisticasClubes VALUES('Lazio',830,292,727,1592,900);
-INSERT INTO EstadisticasSelecciones VALUES('EspaÃ±a',490,162,227,592,320);
+INSERT INTO EstadisticasSelecciones VALUES('España',490,162,227,592,320);
 INSERT INTO EstadisticasSelecciones VALUES('Inglaterra',230,192,227,392,100);
 INSERT INTO EstadisticasSelecciones VALUES('Belgica',230,162,127,492,300);
 INSERT INTO EstadisticasSelecciones VALUES('Polonia',330,292,123,792,900);
-INSERT INTO Titulos VALUES(1,'Trofeo UEFFA Champions Leage',,'FC Barcelona',,5);
-INSERT INTO Titulos VALUES(2,'Trofeo Balon De Oro',,,'Lionel Andres Messi',7);
-INSERT INTO Titulos VALUES(3,'Trofeo Bota De Oro',,,'Cristian Ronaldo',2);
-INSERT INTO Titulos VALUES(4,'Trofeo Mundial','Francia',,,2);
-INSERT INTO Partidos VALUES (1,'Francia','EspaÃ±a','23/jul/2021','2:1','Stade De France');
+INSERT INTO Titulos VALUES(1,'Trofeo UEFFA Champions Leage',null,'FC Barcelona',null,5);
+INSERT INTO Titulos VALUES(2,'Trofeo Balon De Oro',null,null,'Lionel Andres Messi',7);
+INSERT INTO Titulos VALUES(3,'Trofeo Bota De Oro',null,null,'Cristian Ronaldo',2);
+INSERT INTO Titulos VALUES(4,'Trofeo Mundial','Francia',null,null,2);
+INSERT INTO Partidos VALUES (1,'Francia','España','23/jul/2021','2:1','Stade De France');
 INSERT INTO Partidos VALUES (2,'Inglaterra','Belgica','12/feb/2015','0:3','Etihat Stadium');
 INSERT INTO Partidos VALUES (3,'Manchester United','Lazio','21/dic/2001','0:0','Old Traford');
 INSERT INTO Partidos VALUES (4,'Paris Saint German','FC Barcelona','15/mar/2020','2:6','Parc des Princes');
 INSERT INTO Sugerencias VALUES (1,'Deberia apostarle al equipo local, dado que tiene una mejor racha faborable y tiene al goleador de la liga');
 INSERT INTO Sugerencias VALUES (2,'Deberia apostarle a que queda en empate, dado que llegan ambos en un momento similar');
-INSERT INTO Estadios VALUES('Stade De France', 81338,'Francia','Paris');
-INSERT INTO Estadios VALUES('Etihat Stadium', 55097,'Inglaterra','Manchester');
-INSERT INTO Estadios VALUES('Old Traford', 76962,'Inglaterra','Manchester');
-INSERT INTO Estadios VALUES('Spotify Camp Now', 81338,'EspaÃ±a','Barcelona');
+
 
 /*Insert CRUD Torneos*/
 INSERT INTO Torneos VALUES('UEFFA Champions Leage','2/ago/2022','29/may/2023','F');
@@ -270,17 +317,16 @@ INSERT INTO Torneos VALUES('FIFA WORD CUP','20/nov/2022','18/dic/2022','T');
 INSERT INTO Torneos VALUES('RFEF Liga Santander','1/ago/2022','20/may/2023','F');
 INSERT INTO Torneos VALUES('FA Premier Leage','1/ago/2022','20/may/2023','F');
 INSERT INTO Torneos VALUES('FCF Liga BetPlay','15/ene/2022','20/may/2022','F');
-INSERT INTO Grupos VALUES('UEFFA Champions Leage',8,'https://tablaChampionsLeage.com');
-INSERT INTO Grupos VALUES('CONMEBOL Copa Libertadores De America',8,'https://tablaCopaLibertadores.com');
-INSERT INTO Grupos VALUES('FIFA WORD CUP',8,'https://tablaMundial.com');
-INSERT INTO Liga VALUES('RFEF Liga Santander',20,'https://tablaLigaSantander.com');
-INSERT INTO Liga VALUES('FA Premier Leage',20,'https://tablaPremierLeage.com');
-INSERT INTO Liga VALUES('FCF Liga BetPlay',20,'https://tablaLigaBetPlay.com');
-INSERT INTO Integrantes VALUES(1,'UEFFA Champions Leage',0,'Mancheste City');
-INSERT INTO Integrantes VALUES(2,'UEFFA Champions Leage',0,'Mancheste United');
-INSERT INTO Integrantes VALUES(3,'UEFFA Champions Leage',0,'Lazio');
-INSERT INTO Integrantes VALUES(4,'UEFFA Champions Leage',0,'Paris Saint German');
-INSERT INTO EstadisticasExtra VALUES('UEFFA Champions Leage','https://goleadorChampionsLeage.com','https://asistenteChampionsLeage.com','https://porteria0LigaBetPlay.com');
+INSERT INTO Grupos VALUES('UEFFA Champions Leage',8);
+INSERT INTO Grupos VALUES('CONMEBOL Copa Libertadores De America',8);
+INSERT INTO Grupos VALUES('FIFA WORD CUP',8);
+INSERT INTO Ligas VALUES('RFEF Liga Santander',20);
+INSERT INTO Ligas VALUES('FA Premier Leage',20);
+INSERT INTO Ligas VALUES('FCF Liga BetPlay',20);
+INSERT INTO EquiposTorneo VALUES(1,'UEFFA Champions Leage',null,null,'Manchester City',1);
+INSERT INTO EquiposTorneo VALUES(2,'UEFFA Champions Leage',null,null,'Manchester United',3);
+INSERT INTO EquiposTorneo VALUES(3,'UEFFA Champions Leage',null,null,'FC Barcelona',2);
+INSERT INTO EstadisticasExtra VALUES('UEFFA Champions Leage','https://goleadorChampionsLeage.com','https://asistenteChampionsLeage.com','https://asistenteChampionsLeage.com');
 INSERT INTO EstadisticasExtra VALUES('CONMEBOL Copa Libertadores De America','https://goleadorCopaLibertadores.com','https://asistenteCopaLibertadores.com','https://porteria0CopaLibertadores.com');
 INSERT INTO EstadisticasExtra VALUES('FIFA WORD CUP','https://goleadorMundial.com','https://asistenteMundial.com','https://porteria0Munial.com');
 INSERT INTO EstadisticasExtra VALUES('RFEF Liga Santander','https://goleadorLigaSantander.com','https://asistenteLigaSantander.com','https://porteria0LigaSantander.com')
@@ -293,6 +339,11 @@ INSERT INTO Usuarios VALUES(8,3119327482,'correo7@escuela');
 INSERT INTO personasnaturales VALUES(5,'2C','100138273','Sebastian Zamora Urrego');
 INSERT INTO Torneos VALUES('FIFA WORD CUP','20/nov/2022','18/dic/2022','A');
 INSERT INTO Partidos VALUES (41,'Paris Saint German','FC Barcelona','15/mar/2019','26','Parc des Princes');
+
+
+/*TRIGGERS*/
+
+CREATE TRIGGER TR_USUARIOS_
 
 /*XPoblar*/
 
@@ -311,7 +362,7 @@ INSERT INTO Partidos VALUES (41,'Paris Saint German','FC Barcelona','15/mar/2019
  DELETE TABLE Sugerencias;
  DELETE TABLE Periodistas;
  DELETE TABLE EstadisticasExtra  S;
- DELETE TABLE Integrantes;
+ DELETE TABLE EquiposTorneos;
  DELETE TABLE TorneosConfederacion;
  DELETE TABLE EstadisticasJugadores;
  DELETE TABLE EstadisticasClubes;
@@ -336,8 +387,10 @@ DROP TABLE Sugerencias CASCADE CONSTRAINTS;
 DROP TABLE PartidosConsultados CASCADE CONSTRAINTS;
 DROP TABLE Periodistas CASCADE CONSTRAINTS;
 DROP TABLE EstadisticasExtra CASCADE CONSTRAINTS;
-DROP TABLE Integrantes CASCADE CONSTRAINTS;
-DROP TABLE TorneosConfederacion CASCADE CONSTRAINTS;
+DROP TABLE EquiposTorneo CASCADE CONSTRAINTS;
 DROP TABLE EstadisticasJugadores CASCADE CONSTRAINTS;
 DROP TABLE EstadisticasClubes CASCADE CONSTRAINTS;
 DROP TABLE EstadisticasSelecciones CASCADE CONSTRAINTS;
+DROP TABLE PersonasNaturales CASCADE CONSTRAINTS;
+DROP TABLE FasesFinales CASCADE CONSTRAINTS;
+
