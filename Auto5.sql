@@ -273,7 +273,9 @@ CREATE OR REPLACE PACKAGE body PC_CATEGORIES IS
                 
             RETURN resp_cursor;
     END coProductsInCategory;
-    
+END PC_CATEGORIES
+
+DROP PACKAGE PC_CATEGORIES;    
 
 
 /*BORRAR TABLAS*/
