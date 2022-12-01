@@ -26,7 +26,8 @@ CREATE TABLE Grupos(
 );
 CREATE TABLE Confederaciones(
     Siglas VARCHAR(8),
-    Nombre VARCHAR(50)
+    Nombre VARCHAR(50),
+    Presidente VARCHAR(50)
 );
 CREATE TABLE Jugadores(
     id_ NUMBER(5),
@@ -39,13 +40,17 @@ CREATE TABLE Selecciones(
     Nombre VARCHAR(50),
     DirTecnico VARCHAR(50),
     Confederaciones_Siglas VARCHAR(8),
-    Estadios_Nombre VARCHAR(100)
+    Estadios_Nombre VARCHAR(100),
+    Jugadores XMLTYPE,
+    Estadisticas XMLTYPE
 );
 CREATE TABLE Clubes(
     Nombre VARCHAR(100),
     pais VARCHAR(100),
     DirTecnico VARCHAR(100),
-    Estadios_Nombre VARCHAR(100)
+    Estadios_Nombre VARCHAR(100),
+    Jugadores XMLTYPE,
+    Estadisticas XMLTYPE
 );
 CREATE TABLE Titulos(
     Id_ NUMBER(5),
@@ -57,17 +62,22 @@ CREATE TABLE Titulos(
 );
 CREATE TABLE Partidos(
     Id_ NUMBER(5),
-    EquipoLocal VARCHAR(50),
-    EquipoVisitante VARCHAR(50),
+    Tipo CHAR,
+    EquipoLocal VARCHAR(100),
+    EquipoVisitante VARCHAR(100),
+    SeleccionLocal VARCHAR(100),
+    SeleccionVisitante VARCHAR(100),
     FechaDeJuego DATE,
     Resultado VARCHAR(5),
+    Ganador VARCHAR(5),
     Estadios_Nombre VARCHAR(100)
 );
 CREATE TABLE Estadios(
     Nombre VARCHAR(100),
     Capasidad VARCHAR(5),
     Pais VARCHAR(100),
-    Ciudad VARCHAR(100)
+    Ciudad VARCHAR(100),
+    EstaEnUso CHAR()
 );
 CREATE TABLE Sugerencias(
     Partidos_id NUMBER(5),
@@ -226,6 +236,7 @@ ALTER TABLE Titulos ADD CONSTRAINT FK_TITULOSSELECCION FOREIGN KEY (Selecciones_
 ALTER TABLE Empresas ADD CONSTRAINT FK_EMPRESASUSUARIO FOREIGN KEY (Usuarios_id) REFERENCES Usuarios(Id_);
 ALTER TABLE Periodistas ADD CONSTRAINT FK_PERIODISRAEMPRESAS FOREIGN KEY (Empresas_Usuarios_id) REFERENCES Empresas(Usuarios_id);
 ALTER TABLE PersonasNaturales ADD CONSTRAINT FK_PERSONAUSUARIO FOREIGN KEY (Usuarios_id) REFERENCES Usuarios(Id_);
+
 
 /*XPoblar*/
 
