@@ -1,4 +1,4 @@
-
+/
 CREATE OR REPLACE PACKAGE PC_admin IS
     PROCEDURE Add_equipo(Nombre Equipos.Nombre%Type,pais Equipos.pais%Type,DirTecnico Equipos.DirTecnico%Type, Estadios_Nombre Equipos.Estadios_Nombre%Type,Titulos Equipos.Titulos%Type,Estadisticas Equipos.Estadisticas%Type);
     PROCEDURE Add_torneo(Nombre Torneos.Nombre%TYPE, FechaInicio Torneos.FechaInicio%TYPE, FechaFin Torneos.FechaFin%TYPE, formato Torneos.formato%TYPE, tipo Torneos.tipo%TYPE);
@@ -20,6 +20,14 @@ CREATE OR REPLACE PACKAGE PC_admin IS
 
     FUNCTION Co_equipo(xNombre Equipos.Nombre%TYPE) RETURN SYS_REFCURSOR;
     FUNCTION Co_torneo (xNombre Torneos.Nombre%TYPE)RETURN SYS_REFCURSOR;
+    FUNCTION Co_partidoSelecciones RETURN SYS_REFCURSOR;
+    FUNCTION Co_confederacion(XSiglas Confederaciones.Siglas%TYPE) RETURN SYS_REFCURSOR;
+    FUNCTION Co_seleccion(XNombre Selecciones.Nombre%TYPE) RETURN SYS_REFCURSOR;
+    FUNCTION Co_partidoEquipo RETURN SYS_REFCURSOR;
+    FUNCTION Co_jugadores(XNombreCompleto Jugadores.NombreCompleto%TYPE) RETURN SYS_REFCURSOR;
+    FUNCTION Co_estadio(XNombre Estadios.Nombre%TYPE) RETURN SYS_REFCURSOR;
+    FUNCTION Co_equipoTorneo(XTorneos_Nombre EquiposTorneo.torneos_nombre%TYPE) RETURN SYS_REFCURSOR;
+    
 
 END PC_admin;
 /
@@ -231,7 +239,70 @@ CREATE OR REPLACE PACKAGE BODY PC_admin AS
             SELECT * FROM Torneos WHERE Nombre = xNombre;
             RETURN resp_cursor;
     END Co_torneo ;
+    
+    FUNCTION Co_partidoSelecciones RETURN SYS_REFCURSOR
+        AS resp_cursor SYS_REFCURSOR;
+        BEGIN
+            OPEN 
+                resp_cursor FOR
+            SELECT * FROM PartidosSeleccion GROUP BY id;
+            RETURN resp_cursor;
+    END Co_partidoSelecciones;
+        
+        
+     FUNCTION Co_confederacion(XSiglas Confederaciones.Siglas%TYPE) RETURN SYS_REFCURSOR
+        AS resp_cursor SYS_REFCURSOR;
+        BEGIN
+            OPEN 
+                resp_cursor FOR
+            SELECT * FROM Confederaciones where Siglas = XSiglas;
+            RETURN resp_cursor;
+    END Co_confederacion;
 
+    FUNCTION Co_seleccion(XNombre Selecciones.Nombre%TYPE) RETURN SYS_REFCURSOR
+        AS resp_cursor SYS_REFCURSOR;
+        BEGIN
+            OPEN 
+                resp_cursor FOR
+            SELECT * FROM Selecciones where Nombre = XNombre;
+            RETURN resp_cursor;
+    END Co_seleccion;
+        
+    FUNCTION Co_partidoEquipo RETURN SYS_REFCURSOR
+        AS resp_cursor SYS_REFCURSOR;
+        BEGIN
+            OPEN 
+                resp_cursor FOR
+            SELECT * FROM PartidosEquipos;
+            RETURN resp_cursor;
+    END Co_partidoEquipo;
+        
+     FUNCTION Co_jugadores(XNombreCompleto Jugadores.NombreCompleto%TYPE) RETURN SYS_REFCURSOR
+        AS resp_cursor SYS_REFCURSOR;
+        BEGIN
+            OPEN 
+                resp_cursor FOR
+            SELECT * FROM Jugadores where NombreCompleto=XNombreCompleto ;
+            RETURN resp_cursor;
+    END Co_jugadores;   
+
+    FUNCTION Co_estadio(XNombre Estadios.Nombre%TYPE) RETURN SYS_REFCURSOR
+        AS resp_cursor SYS_REFCURSOR;
+        BEGIN
+            OPEN 
+                resp_cursor FOR
+            SELECT * FROM Estadios where Nombre=XNombre ;
+            RETURN resp_cursor;
+    END Co_estadio;
+        
+    FUNCTION Co_equipoTorneo(XTorneos_Nombre EquiposTorneo.torneos_nombre%TYPE) RETURN SYS_REFCURSOR
+        AS resp_cursor SYS_REFCURSOR;
+        BEGIN
+            OPEN 
+                resp_cursor FOR
+            SELECT * FROM EquiposTorneo where torneos_nombre=XTorneos_Nombre ;
+            RETURN resp_cursor;
+    END Co_equipoTorneo;
 END PC_admin;
 /
 CREATE OR REPLACE PACKAGE PA_analista IS
@@ -250,6 +321,8 @@ CREATE OR REPLACE PACKAGE BODY PA_analista AS
             ROLLBACK;
             DBMS_OUTPUT.PUT_LINE('No se pudo registrar la sugerencia correctamente');
     END AD_sugerencia;
+    
+    
 END PA_analista;
 /
 
